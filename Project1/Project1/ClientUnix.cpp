@@ -13,21 +13,21 @@
 
 int main(int argc, char* argv[])
 {
-    FILE* fp;
+    //not sure whats this is doing:
+    //FILE* fp;
     struct hostent* hp;
     struct sockaddr_in sin;
     char* host;
     char buf[MAX_LINE];
     int s;
-    int len;
+    //int len;
 
-    if (argc == 2) {
-        host = argv[1];
-    }
-    else {
-        fprintf(stderr, "usage: simplex-talk host\n");
+    if (argc != 2) {
+        fprintf(stderr, "usage: %s host\n", argv[0]);
         exit(1);
     }
+
+    host = argv[1];
 
     // translate host name into IP address 
     hp = gethostbyname(host);
@@ -54,16 +54,37 @@ int main(int argc, char* argv[])
         exit(1);
     }
     
-    while (fgets(buf, sizeof(buf), stdin)) {
-        buf[MAX_LINE - 1] = '\0';
-        len = strlen(buf) + 1;
-        send(s, buf, len, 0);
-        memset(buf, 0, sizeof(buf)); 
-        recv(s, buf, sizeof(buf), 0); // Receive response from server
-        printf("%s", buf); // Print response
-    }
+    // 
+    // Commands
+    char command[MAX_LINE];
+    strcpy(command, "BUY MSFT 3.4 1.35 1\n");
+    strcpy(command, "SELL APPL 2 1.45 1\n");
+    strcpy(command, "LIST\n");
+    strcpy(command, "BALANCE\n");
+    strcpy(command, "SHUTDOWN\n");
+    strcpy(command, "QUIT\n");
 
+    // Send command to server
+    send(s, command, strlen(command), 0);
+    std::cout << "Sent command to server: " << command << std::endl;
+
+    // Receive response from server
+    int bytes_received = recv(s, buf, sizeof(buf), 0);
+    if (bytes_received > 0) {
+        buf[bytes_received] = '\0';
+        // Check for "200 OK" response
+        if (strncmp(buf, "200 OK", 6) == 0) {
+            // Print actual response message
+            std::cout << "Received response from server: " << buf + 7 << std::endl;
+        }
+        else {
+            std::cerr << "Error response from server: " << buf << std::endl;
+        }
+    }
+    else {
+        std::cerr << "Error receiving response from server" << std::endl;
+    }
+}
     close(s);
     return 0;
 }
-    
