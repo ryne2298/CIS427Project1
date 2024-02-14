@@ -6,8 +6,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <sqlite3.h>
 
-#define SERVER_PORT  5432
+#define SERVER_PORT "8080" 
 #define MAX_PENDING  5
 #define MAX_LINE     256
 
