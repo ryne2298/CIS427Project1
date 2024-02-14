@@ -1,0 +1,8 @@
+﻿  Client.cpp
+C:\Users\Yuliya\source\repos\CIS427Project1\Project1\Project1\Client.cpp(55,36): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Yuliya\source\repos\CIS427Project1\Project1\Project1\Client.cpp(36,14): error C4996: 'gethostbyname': Use getaddrinfo() or GetAddrInfoW() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  Project1.cpp
+  Server.cpp
+C:\Users\Yuliya\source\repos\CIS427Project1\Project1\Project1\Server.cpp(39,20): warning C4244: '=': conversion from 'SOCKET' to 'int', possible loss of data
+C:\Users\Yuliya\source\repos\CIS427Project1\Project1\Project1\Server.cpp(60,23): warning C4244: '=': conversion from 'SOCKET' to 'int', possible loss of data
+  Generating Code...
