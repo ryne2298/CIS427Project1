@@ -1,9 +1,9 @@
-#include <stdio.h>
+#include <iostream>
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <sqlite3.h>
 #pragma comment(lib,"ws2_32.lib") 
 
 #define SERVER_PORT  5432
