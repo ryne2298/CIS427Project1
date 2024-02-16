@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
         break;
     }
 
-    freeaddrinfo(res); /
+    freeaddrinfo(res); 
 
         if (s == INVALID_SOCKET) {
             fprintf(stderr, "Unable to connect to server!\n");
