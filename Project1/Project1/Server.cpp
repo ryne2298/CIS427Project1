@@ -29,7 +29,7 @@ bool userExists(int userId) {
     sqlite3_stmt* stmt;
     sprintf(sql, "SELECT COUNT(*) FROM Users WHERE user_id = %d", userId);
 
-   
+
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
         return false;
@@ -40,12 +40,12 @@ bool userExists(int userId) {
         result = sqlite3_column_int(stmt, 0);
     }
 
-    
+
     sqlite3_finalize(stmt);
     return result > 0;
 }
 
-float user1_balance = 100.0; 
+float user1_balance = 100.0;
 
 
 
@@ -63,12 +63,12 @@ void handleBuy(SOCKET clientSocket, char* command) {
         return;
     }
 
-    
+}
     float total_cost = stock_amount * price_per_stock;
 
     // Check if user has enough balance and update balance if needed
     if (user_id == 1 && user1_balance >= total_cost) {
-       
+
         user1_balance -= total_cost;
         updateStocksTable(stock_symbol, stock_amount, price_per_stock);
 
@@ -78,7 +78,7 @@ void handleBuy(SOCKET clientSocket, char* command) {
         send(clientSocket, response, strlen(response), 0);
     }
     else {
-         send(clientSocket, "Not enough balance or user doesn't exist\n", 42, 0);
+        send(clientSocket, "Not enough balance or user doesn't exist\n", 42, 0);
     }
 }
 // Function to handle SELL command

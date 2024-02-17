@@ -1,254 +1,107 @@
 #include <iostream>
-#include <winsock2.h>
-#include <ws2tcpip.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <cstdio>
 #include <string.h>
 #include <sqlite3.h>
 
-
-#define SERVER_PORT "8080" 
+#define SERVER_PORT 8080
 #define MAX_LINE 256
 
-// handle BUY 
-void handleBuy(SOCKET clientSocket, char* command) {
-     send(clientSocket, command, strlen(command), 0);
+int main(int argc, char* argv[])
+{
+    nt main(int argc, char* argv[])
+    {
+        struct hostent* hp;
+        struct sockaddr_in sin;
+        char* host;
+        char buf[MAX_LINE];
+        int s;
 
-    // response
-    char response[MAX_LINE];
-    int bytesReceived = recv(clientSocket, response, MAX_LINE, 0);
-    if (bytesReceived > 0) {
-        response[bytesReceived] = '\0';
-        std::cout << "Received response from server: " << response << std::endl;
-    }
-    else {
-        std::cerr << "Error receiving response from server" << std::endl;
-    }
-}
-
-// handle SELL 
-void handleSell(SOCKET clientSocket, char* command) {
-     send(clientSocket, command, strlen(command), 0);
-
-    
-    char response[MAX_LINE];
-    int bytesReceived = recv(clientSocket, response, MAX_LINE, 0);
-    if (bytesReceived > 0) {
-        response[bytesReceived] = '\0';
-        std::cout << "Received response from server: " << response << std::endl;
-    }
-    else {
-        std::cerr << "Error receiving response from server" << std::endl;
-    }
-}
-
-// handle LIST 
-void handleList(SOCKET clientSocket) {
-     send(clientSocket, "LIST\n", 6, 0);
-
-   
-    char response[MAX_LINE];
-    int bytesReceived = recv(clientSocket, response, MAX_LINE, 0);
-    if (bytesReceived > 0) {
-        response[bytesReceived] = '\0';
-        std::cout << "Received response from server: " << response << std::endl;
-    }
-    else {
-        std::cerr << "Error receiving response from server" << std::endl;
-    }
-}
-
-// handle BALANCE
-void handleBalance(SOCKET clientSocket) {
-     send(clientSocket, "BALANCE\n", 8, 0);
-
-   
-    char response[MAX_LINE];
-    int bytesReceived = recv(clientSocket, response, MAX_LINE, 0);
-    if (bytesReceived > 0) {
-        response[bytesReceived] = '\0';
-        std::cout << "Received response from server: " << response << std::endl;
-    }
-    else {
-        std::cerr << "Error receiving response from server" << std::endl;
-    }
-}
-
-// handle SHUTDOWN 
-void handleShutdown(SOCKET clientSocket) {
-     send(clientSocket, "SHUTDOWN\n", 9, 0);
-
-    
-    char response[MAX_LINE];
-    int bytesReceived = recv(clientSocket, response, MAX_LINE, 0);
-    if (bytesReceived > 0) {
-        response[bytesReceived] = '\0';
-        std::cout << "Received response from server: " << response << std::endl;
-    }
-    else {
-        std::cerr << "Error receiving response from server" << std::endl;
-    }
-
-    // Close socket and clean up
-    closesocket(clientSocket);
-    WSACleanup();
-    exit(0);
-}
-
-// handle QUIT 
-void handleQuit(SOCKET clientSocket) {
-     send(clientSocket, "QUIT\n", 5, 0);
-
-   
-    char response[MAX_LINE];
-    int bytesReceived = recv(clientSocket, response, MAX_LINE, 0);
-    if (bytesReceived > 0) {
-        response[bytesReceived] = '\0';
-        std::cout << "Received response from server: " << response << std::endl;
-    }
-    else {
-        std::cerr << "Error receiving response from server" << std::endl;
-    }
-
-    // Close 
-    closesocket(clientSocket);
-}
-
-
-
-
-
-int main(int argc, char* argv[]) {
-    WSADATA wsaData;
-    struct addrinfo hints, * res, * ptr;
-    char* host;
-    char buf[MAX_LINE];
-    SOCKET s = INVALID_SOCKET;
-    int len;
-
-    if (argc == 2) {
-        host = argv[1];
-    }
-    else {
-        fprintf(stderr, "usage: simplex-talk host\n");
-        exit(1);
-    }
-
-    // Initialize Winsock
-    int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-    if (iResult != 0) {
-        fprintf(stderr, "WSAStartup failed: %d\n", iResult);
-        exit(1);
-    }
-
-    ZeroMemory(&hints, sizeof(hints));
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_protocol = IPPROTO_TCP;
-
-    iResult = getaddrinfo(host, SERVER_PORT, &hints, &res);
-    if (iResult != 0) {
-        fprintf(stderr, "getaddrinfo failed: %d\n", iResult);
-        WSACleanup();
-        exit(1);
-    }
-
-    for (ptr = res; ptr != NULL; ptr = ptr->ai_next) {
-        // Create a SOCKET 
-        s = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
-        if (s == INVALID_SOCKET) {
-            fprintf(stderr, "socket failed with error: %ld\n", WSAGetLastError());
-            WSACleanup();
+        if (argc != 2) {
+            fprintf(stderr, "usage: %s host\n", argv[0]);
             exit(1);
         }
 
-        iResult = connect(s, ptr->ai_addr, (int)ptr->ai_addrlen);
-        if (iResult == SOCKET_ERROR) {
-            closesocket(s);
-            s = INVALID_SOCKET;
-            continue;
-        }
-        break;
-    }
+        host = argv[1];
 
-    freeaddrinfo(res);
 
-    if (s == INVALID_SOCKET) {
-        fprintf(stderr, "Unable to connect to server!\n");
-        WSACleanup();
-        exit(1);
-    }
 
-    // Command loop
-    while (true) {
-        std::cout << "Enter command (BUY, SELL, LIST, BALANCE, SHUTDOWN, QUIT): ";
-        std::cin.getline(buf, sizeof(buf));
-        len = (int)strlen(buf);
+    // translate host name into IP address 
+        hp = gethostbyname(host);
+        if (!hp) {
+            fprintf(stderr, "simplex-talk: unknown host: %s\n", host);
+            exit(1);
+        }
 
-        if (strncmp(buf, "BUY", 3) == 0) {
-            handleBuy(s, buf);
-        }
-        else if (strncmp(buf, "SELL", 4) == 0) {
-            handleSell(s, buf);
-        }
-        else if (strncmp(buf, "LIST", 4) == 0) {
-            handleList(s);
-        }
-        else if (strcmp(buf, "BALANCE") == 0) {
-            handleBalance(s);
-        }
-        else if (strcmp(buf, "SHUTDOWN") == 0) {
-            handleShutdown(s);
-        }
-        else if (strcmp(buf, "QUIT") == 0) {
-            handleQuit(s);
-        }
-        else {
-            //to the server
-             send(s, buf, len, 0);
+    // build address data structure 
+        bzero((char*)&sin, sizeof(sin));
+        sin.sin_family = AF_INET;
+        bcopy(hp->h_addr, (char*)&sin.sin_addr, hp->h_length);
+        sin.sin_port = htons(SERVER_PORT);
 
-            //responce
-            int bytesReceived = recv(s, buf, MAX_LINE, 0);
-            if (bytesReceived > 0) {
-                buf[bytesReceived] = '\0';
-                std::cout << "Received response from server: " << buf << std::endl;
-            }
-            else {
-                std::cerr << "Error receiving response from server" << std::endl;
-            }
+        // Create socket
+        if ((s = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+            perror("simplex-talk: socket");
+            exit(1);
         }
-    }
 
-    //exceptions to handle error if user does not exist
-    while (fgets(buf, sizeof(buf), stdin)) {
-        buf[MAX_LINE - 1] = '\0';
-        len = (int)strlen(buf) + 1;
-        send(s, buf, len, 0);
+        // Connect to server
+        if (connect(s, (struct sockaddr*)&sin, sizeof(sin)) < 0) {
+            perror("simplex-talk: connect");
+            close(s);
+            exit(1);
+        }
 
-        // response
-        int bytes_received = recv(s, buf, sizeof(buf), 0);
-        if (bytes_received > 0) {
+
+   
+    // Commands
+        char command[MAX_LINE];
+
+        // Send multiple commands to server
+        strcpy(command, "BUY MSFT 3.4 1.35 1\n");
+        send(s, command, strlen(command), 0);
+        std::cout << "Sent command to server: " << command << std::endl;
+
+        strcpy(command, "SELL APPL 2 1.45 1\n");
+        send(s, command, strlen(command), 0);
+        std::cout << "Sent command to server: " << command << std::endl;
+
+        strcpy(command, "LIST\n");
+        send(s, command, strlen(command), 0);
+        std::cout << "Sent command to server: " << command << std::endl;
+
+        strcpy(command, "BALANCE\n");
+        send(s, command, strlen(command), 0);
+        std::cout << "Sent command to server: " << command << std::endl;
+
+        strcpy(command, "SHUTDOWN\n");
+        send(s, command, strlen(command), 0);
+        std::cout << "Sent command to server: " << command << std::endl;
+
+        strcpy(command, "QUIT\n");
+        send(s, command, strlen(command), 0);
+        std::cout << "Sent command to server: " << command << std::endl;
+
+        // Receive response 
+        int bytes_received;
+        while ((bytes_received = recv(s, buf, sizeof(buf), 0)) > 0) {
             buf[bytes_received] = '\0';
-            std::cout << "Received response from server: " << buf << std::endl;
-
-            
-            if (strstr(buf, "200 OK") != nullptr) {
-                
-
-
+            // Check for "200 OK" response
+            if (strncmp(buf, "200 OK", 6) == 0) {
+                // Print actual response message
+                std::cout << "Received response from server: " << buf + 7 << std::endl;
             }
             else {
-                 std::cerr << "Connection closed by server " << std::endl;
-                
+                std::cerr << "Error response from server: " << buf << std::endl;
             }
         }
-        else {
-            std::cerr << "Error receiving response from server:   " << WSAGetLastError() << std::endl;
-            
-        }
-    }
 
-    shutdown(s, SD_SEND);
-    closesocket(s);
-    WSACleanup();
-    return 0;
-}
+        // Close socket
+        close(s);
+        return 0;
+    }

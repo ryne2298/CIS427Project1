@@ -1,9 +1,8 @@
 {
   "ExpandedNodes": [
     "",
-    "\\Project1",
-    "\\x64\\Debug"
+    "\\Project1"
   ],
-  "SelectedNode": "\\Project1\\ServerUnix.cpp",
+  "SelectedNode": "\\Project1\\Server.cpp",
   "PreviewInSolutionExplorer": false
 }
