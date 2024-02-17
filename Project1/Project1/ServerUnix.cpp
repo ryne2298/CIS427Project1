@@ -86,7 +86,7 @@ void checkOrCreateUser() {
 
 // BUY command
 void handleBuy(int new_s, char* command) {
-    char stock_symbol[20];
+    char stock_symbol[20]; 
     float stock_amount;
     float price_per_stock;
     int user_id;

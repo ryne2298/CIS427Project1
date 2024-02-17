@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
         exit(1);
     }
     
-    // 
+
     // Commands
     char command[MAX_LINE];
     strcpy(command, "BUY MSFT 3.4 1.35 1\n");

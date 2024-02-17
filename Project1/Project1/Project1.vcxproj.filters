@@ -24,6 +24,11 @@
     <ClCompile Include="ClientUnix.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-   
+    <ClCompile Include="ServerWind.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ClientWind.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
