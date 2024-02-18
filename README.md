@@ -7,7 +7,7 @@ Used language c++
 
 
 • Running Instructions:
-o For example, gcc -o server.c
+o For example, gcc -o server.c ,
    gcc server.cpp sqlite3.o-o server
 
 • Each Student’s role:
