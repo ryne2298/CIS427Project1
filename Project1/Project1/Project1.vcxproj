@@ -131,6 +131,16 @@
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="Project1.cpp" />
     <ClCompile Include="Server.cpp" />
+    <ClCompile Include="shell.c" />
+    <ClCompile Include="sqlite3.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="sqlite3.h" />
+    <ClInclude Include="WinSock2.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="sqlite3.dll" />
+    <None Include="stocks.db" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

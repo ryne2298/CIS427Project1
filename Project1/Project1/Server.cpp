@@ -63,7 +63,7 @@ void handleBuy(SOCKET clientSocket, char* command) {
         return;
     }
 
-}
+
     float total_cost = stock_amount * price_per_stock;
 
     // Check if user has enough balance and update balance if needed

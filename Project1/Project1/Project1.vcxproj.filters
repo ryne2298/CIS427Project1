@@ -24,5 +24,27 @@
     <ClCompile Include="Client.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="sqlite3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="shell.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="sqlite3.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WinSock2.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="sqlite3.dll">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="stocks.db">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
