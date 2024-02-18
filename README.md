@@ -7,16 +7,14 @@ Used language c++
 
 
 • Running Instructions:
-o For example, gcc -o server.c ,
-   gcc server.cpp sqlite3.o-o server
+   gcc server.cpp sqlite3.o-o server  (not working)
 
 • Each Student’s role:
-o Student 1: Implemented the following features:...
-o Student 2: Implemented the following features: .....
+o Student 1: Implemented the following features:worked on c++ code, debugging
+o Student 2: Implemented the following features: worked on SQL, Database, debugging
 
 • Bugs in the code:
-o Including but not limited to the bugs in the code and cases that were not
-implemented in this code...
+did not compile no matter what we did
 
  We created code for Linux and tried to start but it told us that it did not support the std::  format,
 which means it does not support standard libraries C++ 11.
