@@ -1,5 +1,2 @@
-﻿  Client.cpp
-  Server.cpp
-C:\Users\Yuliya\source\repos\CIS427Project1\Project1\Project1\Client.cpp(7,10): error C1083: Cannot open include file: 'sqlite3.h': No such file or directory
-C:\Users\Yuliya\source\repos\CIS427Project1\Project1\Project1\Server.cpp(6,10): error C1083: Cannot open include file: 'sqlite3.h': No such file or directory
-  Generating Code...
+﻿  Project1.cpp
+  Project1.vcxproj -> C:\Users\Yuliya\source\repos\CIS427Project1\Project1\x64\Debug\Project1.exe

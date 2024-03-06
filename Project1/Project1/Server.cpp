@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sqlite3.h>
-
+using namespace std;
 
 #define SERVER_PORT  8080
 #define MAX_PENDING  5
@@ -27,7 +27,7 @@ static int callback(void* NotUsed, int argc, char** argv, char** azColName) {
 bool userExists(int userId) {
     char sql[100];
     sqlite3_stmt* stmt;
-    sprintf(sql, "SELECT COUNT(*) FROM Users WHERE user_id = %d", userId);
+    sprintf_s(sql, sizeof(sql), "SELECT COUNT(*) FROM Users WHERE user_id = %d", userId);
 
 
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
@@ -48,63 +48,104 @@ bool userExists(int userId) {
 float user1_balance = 100.0;
 
 
+void updateStocksTable(const char* stock_symbol, float stock_amount, float price_per_stock) {
+    char* errMsg = nullptr;
+    char sql[1024];
+
+
+    // update the stock amount and price if the symbol exists,
+    // or insert a new record if it doesn't
+    sprintf_s(sql, sizeof(sql),
+        "INSERT INTO stocks (symbol, amount, price) VALUES ('%s', %f, %f) "
+        "ON CONFLICT(symbol) DO UPDATE SET amount = amount + %f, price = %f;",
+        stock_symbol, stock_amount, price_per_stock, stock_amount, price_per_stock);
+
+    int rc = sqlite3_exec(db, sql, nullptr, nullptr, &errMsg);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errMsg);
+        sqlite3_free(errMsg);
+    }
+    else {
+        printf("Stock table updated successfully\n");
+    }
+}
+
+
+
+
 
 
 // Function to handle BUY command
-void handleBuy(SOCKET clientSocket, char* command) {
+void handleBuy(SOCKET clientSocket, char* command)
+{
     char stock_symbol[20];
     float stock_amount;
     float price_per_stock;
     int user_id;
 
     // Parse command
-    if (sscanf(command, "BUY %s %f %f %d", stock_symbol, &stock_amount, &price_per_stock, &user_id) != 4) {
-        send(clientSocket, "Invalid command format", 23, 0);
-        return;
+    if (sscanf_s(command, "BUY %s %f %f %d", stock_symbol, (unsigned)_countof(stock_symbol), &stock_amount, &price_per_stock, &user_id) != 4) {
+        {
+            send(clientSocket, "Invalid command format", 23, 0);
+            return;
+        }
+
+
+        float total_cost = stock_amount * price_per_stock;
+
+        // Check if user has enough balance and update balance if needed
+        if (user_id == 1 && user1_balance >= total_cost) {
+
+            user1_balance -= total_cost;
+            updateStocksTable(stock_symbol, stock_amount, price_per_stock);
+
+            // info message to client
+            char response[MAX_LINE];
+            sprintf_s(response, sizeof(response), "200 OK\nBOUGHT: New balance: %.2f %s. USD balance $%.2f\n", stock_amount, stock_symbol, user1_balance);
+            send(clientSocket, response, static_cast<int>(strlen(response)), 0);
+
+        }
+        else {
+            send(clientSocket, "Not enough balance or user doesn't exist\n", 42, 0);
+        }
+
     }
 
-
-    float total_cost = stock_amount * price_per_stock;
-
-    // Check if user has enough balance and update balance if needed
-    if (user_id == 1 && user1_balance >= total_cost) {
-
-        user1_balance -= total_cost;
-        updateStocksTable(stock_symbol, stock_amount, price_per_stock);
-
-        // info message to client
-        char response[MAX_LINE];
-        sprintf(response, "200 OK\nBOUGHT: New balance: %.2f %s. USD balance $%.2f\n", stock_amount, stock_symbol, user1_balance);
-        send(clientSocket, response, strlen(response), 0);
-    }
-    else {
-        send(clientSocket, "Not enough balance or user doesn't exist\n", 42, 0);
-    }
 }
+
+
 // Function to handle SELL command
-void handleSell(SOCKET clientSocket, char* command) {
+void handleSell(SOCKET clientSocket, char* command)
+{
     char stock_symbol[20];
     float stock_amount;
     float price_per_stock;
     int user_id;
 
     // Parse 
-    if (sscanf(command, "SELL %s %f %f %d", stock_symbol, &stock_amount, &price_per_stock, &user_id) != 4) {
-        send(clientSocket, "Invalid command format", 23, 0);
-        return;
+    if (sscanf_s(command, "SELL %s %f %f %d", stock_symbol, (unsigned)_countof(stock_symbol), &stock_amount, &price_per_stock, &user_id) != 4)
+    {
+
+        {
+            send(clientSocket, "Invalid command format", 23, 0);
+            return;
+        }
+
+        //total
+        float total_earnings = stock_amount * price_per_stock;
+
+        // Deposit earnings to user balance (assuming user balance is a global variable)
+        user1_balance += total_earnings;
+
+        // Send success message to client
+        char response[MAX_LINE];
+        sprintf_s(response, sizeof(response), "200 OK\nSOLD: %.1f %s. USD balance: $%.2f", stock_amount, stock_symbol, user1_balance);
+        send(clientSocket, response, static_cast<int>(strlen(response)), 0);
+
     }
 
-    //total
-    float total_earnings = stock_amount * price_per_stock;
-
-    // Deposit earnings to user balance (assuming user balance is a global variable)
-    user1_balance += total_earnings;
-
-    // Send success message to client
-    char response[MAX_LINE];
-    sprintf(response, "200 OK\nSOLD: New balance: %.1f %s. USD $%.2f\n", stock_amount, stock_symbol, user1_balance);
-    send(clientSocket, response, strlen(response), 0);
 }
+
 
 
 
@@ -176,7 +217,8 @@ void handleBalance(SOCKET clientSocket) {
         double balance = sqlite3_column_double(stmt, 0);
         char response[MAX_LINE];
         snprintf(response, sizeof(response), "200 OK\nBalance for user 1: $%.2f", balance);
-        send(clientSocket, response, strlen(response), 0);
+        send(clientSocket, response, static_cast<int>(strlen(response)), 0);
+
     }
     else {
         send(clientSocket, "User not found", 14, 0);
@@ -189,7 +231,8 @@ void handleBalance(SOCKET clientSocket) {
 }
 
 // Function to handle SHUTDOWN command
-void handleShutdown(SOCKET clientSocket, SOCKET listenSocket) {
+void handleShutdown(SOCKET clientSocket, SOCKET listenSocket)
+{
     send(clientSocket, "200 OK\n", 7, 0);
     closesocket(clientSocket);
     closesocket(listenSocket);
@@ -225,7 +268,7 @@ int main() {
     }
 
     // Open database connection
-    if (sqlite3_open("stocks.db", &db) != SQLITE_OK) {
+    if (sqlite3_open("stock.db", &db) != SQLITE_OK) {
         fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
         return 1;
     }
@@ -293,7 +336,8 @@ int main() {
                     handleBalance(clientSocket);
                 }
                 else if (strncmp(buf, "SHUTDOWN", 8) == 0) {
-                    handleShutdown(clientSocket);
+                    handleShutdown(clientSocket, listenSocket);
+                    break;
                 }
                 else if (strncmp(buf, "QUIT", 4) == 0) {
                     handleQuit(clientSocket);
@@ -306,7 +350,6 @@ int main() {
                 printf("Connection closing...\n");
             else {
                 printf("Recv failed with error: %d\n", WSAGetLastError());
-                closesocket(clientSocket);
                 WSACleanup();
                 return 1;
             }

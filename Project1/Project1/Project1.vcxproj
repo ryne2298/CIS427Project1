@@ -104,6 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\Yuliya\source\repos\CIS427Project1\Project1\sqlite-amalgamation-3450100;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -128,19 +129,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Client.cpp" />
+    <ClCompile Include="..\sqlite-amalgamation-3450100\sqlite3.c" />
     <ClCompile Include="Project1.cpp" />
-    <ClCompile Include="Server.cpp" />
-    <ClCompile Include="shell.c" />
-    <ClCompile Include="sqlite3.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="sqlite3.h" />
     <ClInclude Include="WinSock2.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="sqlite3.dll" />
-    <None Include="stocks.db" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
