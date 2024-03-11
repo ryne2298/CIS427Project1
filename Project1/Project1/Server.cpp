@@ -12,7 +12,7 @@ using namespace std;
 
 //SQL
 sqlite3* db;
-
+string currentUserId;
 
 static int callback(void* NotUsed, int argc, char** argv, char** azColName) {
     int i;
@@ -22,6 +22,20 @@ static int callback(void* NotUsed, int argc, char** argv, char** azColName) {
     return 0;
 }
 
+
+void handleLogin(SOCKET clientSocket, char* command) {
+    std::string userId, password;
+    std::istringstream iss(command + 6); // Skip "LOGIN "
+    iss >> userId >> password;
+
+    if (userCredentials.find(userId) != userCredentials.end() && userCredentials[userId] == password) {
+        send(clientSocket, "200 OK\n", 7, 0);
+        currentUserId = userId;
+    }
+    else {
+        send(clientSocket, "403 Wrong UserID or Password\n", 29, 0);
+    }
+}
 
 // Function to check if a user exists in the database
 bool userExists(int userId) {
@@ -150,7 +164,7 @@ void handleSell(SOCKET clientSocket, char* command)
 
 
 // Function to handle LIST command
-void handleList(SOCKET clientSocket) {
+void handleList(SOCKET clientSocket, const std::string& userId) {
     sqlite3* db;
     int rc = sqlite3_open("stocks.db", &db);
     if (rc) {
@@ -159,6 +173,7 @@ void handleList(SOCKET clientSocket) {
         return;
     }
 
+    if (userID)
     const char* sql = "SELECT * FROM Stocks;";
     sqlite3_stmt* stmt;
     rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
@@ -231,13 +246,21 @@ void handleBalance(SOCKET clientSocket) {
 }
 
 // Function to handle SHUTDOWN command
-void handleShutdown(SOCKET clientSocket, SOCKET listenSocket)
-{
-    send(clientSocket, "200 OK\n", 7, 0);
-    closesocket(clientSocket);
-    closesocket(listenSocket);
+void handleShutdown(SOCKET clientSocket, const std::string& userId) {
+    if (userId != "root") {
+        send(clientSocket, "Permission denied\n", 18, 0);
+        return;
+    }
+
+    // Broadcast message to all connected clients before shutting down
+    for (auto& socket : allClientSockets) {  
+        send(socket, "Server is shutting down\n", 24, 0);
+        closesocket(socket);
+    }
+
+    // Shutdown server operations
     WSACleanup();
-    exit(0);
+    exit(0);  
 }
 
 // Function to handle QUIT command
@@ -268,9 +291,10 @@ void handleLookup(SOCKET clientSocket, const std::string& userId, char* command)
 void handleDeposit(SOCKET clientSocket, const std::string& userId, char* command) {
     float depositAmount;
     if (sscanf(command, "DEPOSIT %f", &depositAmount) == 1) {
-        // Assuming you have a function updateUserBalance that updates the user's balance and returns the new balance
+        // Update user balance
         float newBalance = updateUserBalance(userId, depositAmount);
 
+        //Output
         char response[MAX_LINE];
         snprintf(response, sizeof(response), "Deposit successfully. New balance $%.2f\n", newBalance);
         send(clientSocket, response, strlen(response), 0);
@@ -374,8 +398,10 @@ int main() {
                     handleBalance(clientSocket);
                 }
                 else if (strncmp(buf, "SHUTDOWN", 8) == 0) {
-                    handleShutdown(clientSocket, listenSocket);
-                    break;
+                    handleShutdown(clientSocket, currentUserId);
+                }
+                else if (strncmp(buf, "LOGIN", 5) == 0) {
+                    handleLogin(clientSocket, buf);
                 }
                 else if (strncmp(buf, "WHO", 3) == 0) {
                     handleWho(clientSocket, currentUserId);
