@@ -246,7 +246,45 @@ void handleQuit(SOCKET clientSocket) {
     closesocket(clientSocket);
 }
 
+void handleWho(SOCKET clientSocket, const std::string& userId) {
+    if (userId != "root") {
+        send(clientSocket, "Permission denied\n", 18, 0);
+        return;
+    }
 
+    std::string response = "200 OK\nThe list of the active users:\n";
+    for (const auto& user : activeUsers) {  
+        response += user.first + " " + user.second + "\n";
+    }
+
+    send(clientSocket, response.c_str(), response.length(), 0);
+}
+
+void handleLookup(SOCKET clientSocket, const std::string& userId, char* command) {
+    std::string stockName = command + 7;
+    std::string sql = "SELECT * FROM Stocks WHERE owner = '" + userId + "' AND symbol LIKE '%" + stockName + "%';";
+}
+
+void handleDeposit(SOCKET clientSocket, const std::string& userId, char* command) {
+    float depositAmount;
+    if (sscanf(command, "DEPOSIT %f", &depositAmount) == 1) {
+        // Assuming you have a function updateUserBalance that updates the user's balance and returns the new balance
+        float newBalance = updateUserBalance(userId, depositAmount);
+
+        char response[MAX_LINE];
+        snprintf(response, sizeof(response), "Deposit successfully. New balance $%.2f\n", newBalance);
+        send(clientSocket, response, strlen(response), 0);
+    }
+    else {
+        send(clientSocket, "Invalid command format\n", 22, 0);
+    }
+}
+
+float updateUserBalance(const std::string& userId, float depositAmount) {
+    float newBalance = getCurrentBalance(userId) + depositAmount;
+    // Update the balance in the database
+    return newBalance;
+}
 
 
 
@@ -339,8 +377,17 @@ int main() {
                     handleShutdown(clientSocket, listenSocket);
                     break;
                 }
+                else if (strncmp(buf, "WHO", 3) == 0) {
+                    handleWho(clientSocket, currentUserId);
+                }
                 else if (strncmp(buf, "QUIT", 4) == 0) {
                     handleQuit(clientSocket);
+                }
+                else if (strncmp(buf, "LOOKUP", 6) == 0) {
+                    handleLookup(clientSocket, currentUserId, buf);
+                }
+                else if (strncmp(buf, "DEPOSIT", 7) == 0) {
+                    handleDeposit(clientSocket, currentUserId, buf);
                 }
                 else {
                     printf("Invalid command\n");

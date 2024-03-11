@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
 
     std::string command;
     while (true) {
-        std::cout << "Enter command (BUY, SELL, LIST, BALANCE, SHUTDOWN, QUIT): ";
+        std::cout << "Enter command (BUY, SELL, DEPOSIT, LIST, WHO, LOOKUP,  BALANCE, SHUTDOWN, QUIT): ";
         std::getline(std::cin, command);
 
         if (command == "QUIT") {
