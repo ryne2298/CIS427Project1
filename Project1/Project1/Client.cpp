@@ -13,6 +13,14 @@ SOCKET createConnectSocket(const char* serverAddr, const char* serverPort);
 void sendCommand(SOCKET& clientSocket, const std::string& command);
 void cleanup(SOCKET clientSocket);
 
+
+void sendLoginCommand(SOCKET& clientSocket, const std::string& userId, const std::string& password) {
+    std::string loginCommand = "LOGIN " + userId + " " + password + "\n";
+    sendCommand(clientSocket, loginCommand);
+}
+
+
+
 int main(int argc, char* argv[]) {
     if (argc != 3) {
         std::cerr << "Usage: " << argv[0] << " <Server Address> <Server Port>\n";
@@ -24,6 +32,14 @@ int main(int argc, char* argv[]) {
 
     initializeWinsock();
     SOCKET clientSocket = createConnectSocket(serverAddr, serverPort);
+
+    std::string userId, password;
+    std::cout << "Enter UserID: ";
+    std::getline(std::cin, userId);
+    std::cout << "Enter Password: ";
+    std::getline(std::cin, password);
+
+    sendLoginCommand(clientSocket, userId, password);
 
     std::string command;
     while (true) {
@@ -120,3 +136,4 @@ void cleanup(SOCKET clientSocket) {
     closesocket(clientSocket);
     WSACleanup();
 }
+
