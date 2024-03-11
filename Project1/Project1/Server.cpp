@@ -12,6 +12,8 @@ using namespace std;
 
 //SQL
 sqlite3* db;
+
+//current user ID
 string currentUserId;
 
 static int callback(void* NotUsed, int argc, char** argv, char** azColName) {
