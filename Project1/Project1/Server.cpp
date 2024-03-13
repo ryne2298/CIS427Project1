@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sqlite3.h>
+#include <pthread.h>
 using namespace std;
 
 #define SERVER_PORT  8080
@@ -317,123 +318,126 @@ float updateUserBalance(const std::string& userId, float depositAmount) {
 
 int main() {
     WSADATA wsaData;
-    int iResult;
-    SOCKET listenSocket = INVALID_SOCKET, clientSocket = INVALID_SOCKET;
+    SOCKET listenSocket = INVALID_SOCKET;
     struct sockaddr_in sin;
-    char buf[MAX_LINE];
-    int buf_len;
     int addr_len;
 
     // Initialize Winsock
-    iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-    if (iResult != NO_ERROR) {
-        printf("Error at WSAStartup()\n");
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+        std::cerr << "Error at WSAStartup()\n";
         return 1;
     }
 
     // Open database connection
     if (sqlite3_open("stock.db", &db) != SQLITE_OK) {
-        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+        std::cerr << "Can't open database: " << sqlite3_errmsg(db) << "\n";
         return 1;
     }
 
     // Check if user exists before handling client requests
     if (!userExists(1)) {
-        printf("User does not exist in the database. Exiting...\n");
+        std::cerr << "User does not exist in the database. Exiting...\n";
         sqlite3_close(db);
         return 1;
     }
 
-    // build address data structure 
+    // Build address data structure
     memset(&sin, 0, sizeof(sin));
     sin.sin_family = AF_INET;
     sin.sin_addr.s_addr = INADDR_ANY;
     sin.sin_port = htons(SERVER_PORT);
 
-    //setup passive open 
+    // Setup passive open
     listenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (listenSocket == INVALID_SOCKET) {
-        printf("Error at socket(): %ld\n", WSAGetLastError());
+        std::cerr << "Error at socket(): " << WSAGetLastError() << "\n";
         WSACleanup();
         return 1;
     }
 
     if (bind(listenSocket, (struct sockaddr*)&sin, sizeof(sin)) == SOCKET_ERROR) {
-        printf("Bind failed with error: %d\n", WSAGetLastError());
+        std::cerr << "Bind failed with error: " << WSAGetLastError() << "\n";
         closesocket(listenSocket);
         WSACleanup();
         return 1;
     }
 
     if (listen(listenSocket, MAX_PENDING) == SOCKET_ERROR) {
-        printf("Listen failed with error: %ld\n", WSAGetLastError());
+        std::cerr << "Listen failed with error: " << WSAGetLastError() << "\n";
         closesocket(listenSocket);
         WSACleanup();
         return 1;
     }
 
-    while (1) {
+    while (true) {
         addr_len = sizeof(sin);
-        clientSocket = accept(listenSocket, (struct sockaddr*)&sin, &addr_len);
+        SOCKET clientSocket = accept(listenSocket, (struct sockaddr*)&sin, (int*)&addr_len);
         if (clientSocket == INVALID_SOCKET) {
-            printf("Accept failed with error: %d\n", WSAGetLastError());
-            closesocket(listenSocket);
-            WSACleanup();
-            return 1;
+            std::cerr << "Accept failed: " << WSAGetLastError() << "\n";
+            continue;
         }
 
-        do {
-            buf_len = recv(clientSocket, buf, MAX_LINE, 0);
-            if (buf_len > 0) {
-                printf("Bytes received: %d\n", buf_len);
-                // Handle client command
-                if (strncmp(buf, "BUY", 3) == 0) {
-                    handleBuy(clientSocket, buf);
+        // Create a thread for each connection and use a lambda function as the thread function
+        std::thread([clientSocket]() {
+            char buf[MAX_LINE];
+            int buf_len;
+
+            while (true) {
+                buf_len = recv(clientSocket, buf, sizeof(buf), 0);
+                if (buf_len > 0) {
+                    buf[buf_len] = '\0';
+
+
+                    // Handle client command
+                    if (strncmp(buf, "BUY", 3) == 0) {
+                        handleBuy(clientSocket, buf);
+                    }
+                    else if (strncmp(buf, "SELL", 4) == 0) {
+                        handleSell(clientSocket, buf);
+                    }
+                    else if (strncmp(buf, "LIST", 4) == 0) {
+                        handleList(clientSocket);
+                    }
+                    else if (strncmp(buf, "BALANCE", 7) == 0) {
+                        handleBalance(clientSocket);
+                    }
+                    else if (strncmp(buf, "SHUTDOWN", 8) == 0) {
+                        handleShutdown(clientSocket, currentUserId);
+                    }
+                    else if (strncmp(buf, "LOGIN", 5) == 0) {
+                        handleLogin(clientSocket, buf);
+                    }
+                    else if (strncmp(buf, "WHO", 3) == 0) {
+                        handleWho(clientSocket, currentUserId);
+                    }
+                    else if (strncmp(buf, "QUIT", 4) == 0) {
+                        handleQuit(clientSocket);
+                    }
+                    else if (strncmp(buf, "LOOKUP", 6) == 0) {
+                        handleLookup(clientSocket, currentUserId, buf);
+                    }
+                    else if (strncmp(buf, "DEPOSIT", 7) == 0) {
+                        handleDeposit(clientSocket, currentUserId, buf);
+                    }
+                    else {
+                        printf("Invalid command\n");
+                    }
+
                 }
-                else if (strncmp(buf, "SELL", 4) == 0) {
-                    handleSell(clientSocket, buf);
-                }
-                else if (strncmp(buf, "LIST", 4) == 0) {
-                    handleList(clientSocket);
-                }
-                else if (strncmp(buf, "BALANCE", 7) == 0) {
-                    handleBalance(clientSocket);
-                }
-                else if (strncmp(buf, "SHUTDOWN", 8) == 0) {
-                    handleShutdown(clientSocket, currentUserId);
-                }
-                else if (strncmp(buf, "LOGIN", 5) == 0) {
-                    handleLogin(clientSocket, buf);
-                }
-                else if (strncmp(buf, "WHO", 3) == 0) {
-                    handleWho(clientSocket, currentUserId);
-                }
-                else if (strncmp(buf, "QUIT", 4) == 0) {
-                    handleQuit(clientSocket);
-                }
-                else if (strncmp(buf, "LOOKUP", 6) == 0) {
-                    handleLookup(clientSocket, currentUserId, buf);
-                }
-                else if (strncmp(buf, "DEPOSIT", 7) == 0) {
-                    handleDeposit(clientSocket, currentUserId, buf);
+                else if (buf_len == 0) {
+                    std::cout << "Connection closing...\n";
+                    break; // Exit loop
                 }
                 else {
-                    printf("Invalid command\n");
+                    std::cerr << "Recv failed with error: " << WSAGetLastError() << "\n";
+                    break; // Exit loop on error
                 }
             }
-            else if (buf_len == 0)
-                printf("Connection closing...\n");
-            else {
-                printf("Recv failed with error: %d\n", WSAGetLastError());
-                WSACleanup();
-                return 1;
-            }
-
-        } while (buf_len > 0);
-
-        closesocket(clientSocket);
+            closesocket(clientSocket); // Correctly placed here
+        }).detach(); // Allow it to run independently
     }
 
+    // Cleanup
     closesocket(listenSocket);
     WSACleanup();
     sqlite3_close(db);

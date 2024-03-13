@@ -1,12 +1,7 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\Yuliya\\source\\repos\\CIS427Project1\\Project1\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{0B0F92C1-919F-4A93-873E-258442BEA977}|Project1\\Project1.vcxproj|C:\\Users\\Yuliya\\source\\repos\\CIS427Project1\\Project1\\Project1\\Project1.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{0B0F92C1-919F-4A93-873E-258442BEA977}|Project1\\Project1.vcxproj|solutionrelative:Project1\\Project1.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    }
-  ],
+  "WorkspaceRootPath": "C:\\Users\\Yuliya\\source\\repos\\CIS427Project2\\CIS427Project1\\Project1\\",
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -14,21 +9,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": -1,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "Project1.cpp",
-              "DocumentMoniker": "C:\\Users\\Yuliya\\source\\repos\\CIS427Project1\\Project1\\Project1\\Project1.cpp",
-              "RelativeDocumentMoniker": "Project1\\Project1.cpp",
-              "ToolTip": "C:\\Users\\Yuliya\\source\\repos\\CIS427Project1\\Project1\\Project1\\Project1.cpp",
-              "RelativeToolTip": "Project1\\Project1.cpp",
-              "ViewState": "AQIAAC0AAAAAAAAAAAAswEgAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-03-06T06:07:20.836Z",
-              "EditorCaption": ""
-            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
