@@ -2,6 +2,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <string>
+#include <pthread.h>
 
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -11,6 +12,7 @@
 void initializeWinsock();
 SOCKET createConnectSocket(const char* serverAddr, const char* serverPort);
 void sendCommand(SOCKET& clientSocket, const std::string& command);
+void listenServerMessages(SOCKET& clientSocket);
 void cleanup(SOCKET clientSocket);
 
 
@@ -19,43 +21,10 @@ void sendLoginCommand(SOCKET& clientSocket, const std::string& userId, const std
     sendCommand(clientSocket, loginCommand);
 }
 
+//initializing multithreading
 
 
-int main(int argc, char* argv[]) {
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " <Server Address> <Server Port>\n";
-        return 1;
-    }
 
-    const char* serverAddr = argv[1];
-    const char* serverPort = argv[2];
-
-    initializeWinsock();
-    SOCKET clientSocket = createConnectSocket(serverAddr, serverPort);
-
-    std::string userId, password;
-    std::cout << "Enter UserID: ";
-    std::getline(std::cin, userId);
-    std::cout << "Enter Password: ";
-    std::getline(std::cin, password);
-
-    sendLoginCommand(clientSocket, userId, password);
-
-    std::string command;
-    while (true) {
-        std::cout << "Enter command (BUY, SELL, DEPOSIT, LIST, WHO, LOOKUP,  BALANCE, SHUTDOWN, QUIT): ";
-        std::getline(std::cin, command);
-
-        if (command == "QUIT") {
-            break; 
-        }
-
-        sendCommand(clientSocket, command);
-    }
-
-    cleanup(clientSocket);
-    return 0;
-}
 
 void initializeWinsock() {
     WSADATA wsaData;
@@ -127,6 +96,68 @@ void sendCommand(SOCKET& clientSocket, const std::string& command) {
         std::cerr << "recv failed: " << WSAGetLastError() << std::endl;
     }
 }
+void listenServerMessages(SOCKET& clientSocket) {
+    char recvbuf[MAX_LINE];
+    int recvResult;
+
+    while (true) {
+        recvResult = recv(clientSocket, recvbuf, MAX_LINE, 0);
+        if (recvResult > 0) {
+            recvbuf[recvResult] = '\0'; // Null-terminate the buffer
+            std::cout << "Server response: " << recvbuf << std::endl;
+        }
+        else if (recvResult == 0) {
+            std::cout << "Connection closed\n";
+            break;
+        }
+        else {
+            std::cerr << "recv failed: " << WSAGetLastError() << std::endl;
+            break;
+        }
+    }
+}
+
+int main(int argc, char* argv[]) {
+    if (argc != 3) {
+        std::cerr << "Usage: " << argv[0] << " <Server Address> <Server Port>\n";
+        return 1;
+    }
+
+    const char* serverAddr = argv[1];
+    const char* serverPort = argv[2];
+
+    initializeWinsock();
+    SOCKET clientSocket = createConnectSocket(serverAddr, serverPort);
+
+    std::thread listenerThread(listenServerMessages, std::ref(clientSocket));
+
+    std::string userId, password;
+    std::cout << "Enter UserID: ";
+    std::getline(std::cin, userId);
+    std::cout << "Enter Password: ";
+    std::getline(std::cin, password);
+
+    sendLoginCommand(clientSocket, userId, password);
+
+    std::string command;
+    while (true) {
+        std::cout << "Enter command (BUY, SELL, DEPOSIT, LIST, WHO, LOOKUP,  BALANCE, SHUTDOWN, QUIT): ";
+        std::getline(std::cin, command);
+
+        if (command == "QUIT") {
+            break; 
+        }
+
+        sendCommand(clientSocket, command);
+    }
+    if (listenerThread.joinable()) {
+        listenerThread.join();
+    }
+
+    cleanup(clientSocket);
+    return 0;
+}
+
 
 void cleanup(SOCKET clientSocket) {
     int result = shutdown(clientSocket, SD_SEND);
