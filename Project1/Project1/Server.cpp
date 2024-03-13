@@ -2,9 +2,12 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <stdlib.h>
+#include <unordered_map>
 #include <string.h>
 #include <sqlite3.h>
-#include <pthread.h>
+#include <thread>
+
+
 using namespace std;
 
 #define SERVER_PORT  8080
@@ -13,6 +16,10 @@ using namespace std;
 
 //SQL
 sqlite3* db;
+unordered_map<string, string> userCredentials = { {"user1", "pass1"}, {"user2", "pass2"}, {"user3", "pass3"}, {"user4", "pass4"} };
+unordered_map<SOCKET, string> activeUsers; // Mapping sockets to user IDs for active sessions
+vector<SOCKET> allClientSockets; // For tracking all connected client sockets
+bool updateUserBalance(const std::string& userId, float depositAmount);
 
 //current user ID
 string currentUserId;
@@ -25,11 +32,15 @@ static int callback(void* NotUsed, int argc, char** argv, char** azColName) {
     return 0;
 }
 
-
+//modified due to using iostream not sstream
 void handleLogin(SOCKET clientSocket, char* command) {
-    std::string userId, password;
-    std::istringstream iss(command + 6); // Skip "LOGIN "
-    iss >> userId >> password;
+    std::string cmdStr(command); 
+    size_t posUserId = cmdStr.find(' ') + 1; // Find end of "LOGIN "
+    size_t posSpaceAfterUserId = cmdStr.find(' ', posUserId); 
+    std::string userId = cmdStr.substr(posUserId, posSpaceAfterUserId - posUserId); // Extract userId
+
+    size_t posPassword = posSpaceAfterUserId + 1; // Start of password
+    std::string password = cmdStr.substr(posPassword); // Extract password
 
     if (userCredentials.find(userId) != userCredentials.end() && userCredentials[userId] == password) {
         send(clientSocket, "200 OK\n", 7, 0);
@@ -176,7 +187,6 @@ void handleList(SOCKET clientSocket, const std::string& userId) {
         return;
     }
 
-    if (userID)
     const char* sql = "SELECT * FROM Stocks;";
     sqlite3_stmt* stmt;
     rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
@@ -291,9 +301,39 @@ void handleLookup(SOCKET clientSocket, const std::string& userId, char* command)
     std::string sql = "SELECT * FROM Stocks WHERE owner = '" + userId + "' AND symbol LIKE '%" + stockName + "%';";
 }
 
+bool updateUserBalance(const std::string& userId, float depositAmount) {
+    char* errMsg = nullptr;
+    char sql[1024];
+
+    sprintf_s(sql, sizeof(sql), "UPDATE Users SET balance = balance + %f WHERE userId = '%s';", depositAmount, userId.c_str());
+
+    int rc = sqlite3_exec(db, sql, nullptr, nullptr, &errMsg);
+    if (rc != SQLITE_OK) {
+        std::cerr << "SQL error: " << errMsg << std::endl;
+        sqlite3_free(errMsg);
+        return false;
+    }
+    return true;
+}
+
+float getCurrentBalance(const std::string& userId) {
+    sqlite3_stmt* stmt = nullptr;
+    float balance = 100.0; // Default to 100.0 if not found
+    const char* sqlQuery = "SELECT balance FROM Users WHERE userId = ?";
+
+    if (sqlite3_prepare_v2(db, sqlQuery, -1, &stmt, nullptr) == SQLITE_OK &&
+        sqlite3_bind_text(stmt, 1, userId.c_str(), -1, SQLITE_STATIC) == SQLITE_OK &&
+        sqlite3_step(stmt) == SQLITE_ROW) {
+        balance = static_cast<float>(sqlite3_column_double(stmt, 0));
+    }
+
+    sqlite3_finalize(stmt);
+    return balance;
+}
+
 void handleDeposit(SOCKET clientSocket, const std::string& userId, char* command) {
     float depositAmount;
-    if (sscanf(command, "DEPOSIT %f", &depositAmount) == 1) {
+    if (sscanf_s(command, "DEPOSIT %f", &depositAmount) == 1) {
         // Update user balance
         float newBalance = updateUserBalance(userId, depositAmount);
 
@@ -307,11 +347,8 @@ void handleDeposit(SOCKET clientSocket, const std::string& userId, char* command
     }
 }
 
-float updateUserBalance(const std::string& userId, float depositAmount) {
-    float newBalance = getCurrentBalance(userId) + depositAmount;
-    // Update the balance in the database
-    return newBalance;
-}
+
+
 
 
 
@@ -396,7 +433,7 @@ int main() {
                         handleSell(clientSocket, buf);
                     }
                     else if (strncmp(buf, "LIST", 4) == 0) {
-                        handleList(clientSocket);
+                        handleList(clientSocket, currentUserId);
                     }
                     else if (strncmp(buf, "BALANCE", 7) == 0) {
                         handleBalance(clientSocket);
@@ -426,14 +463,14 @@ int main() {
                 }
                 else if (buf_len == 0) {
                     std::cout << "Connection closing...\n";
-                    break; // Exit loop
+                    break; 
                 }
                 else {
                     std::cerr << "Recv failed with error: " << WSAGetLastError() << "\n";
-                    break; // Exit loop on error
+                    break; 
                 }
             }
-            closesocket(clientSocket); // Correctly placed here
+            closesocket(clientSocket); 
         }).detach(); // Allow it to run independently
     }
 

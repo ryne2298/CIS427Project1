@@ -48,7 +48,7 @@ int createTable(const char* s) {
         "LAST_NAME TEXT, "
         "USER_NAME TEXT NOT NULL, "
         "PASSWORD TEXT, "
-        "USD_BALANCE REAL NOT NULL);";
+        "USD_BALANCE REAL DEFAULT 100.0);";
 
     try {
         int exit = 0;
