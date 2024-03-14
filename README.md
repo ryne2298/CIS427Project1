@@ -4,14 +4,15 @@
 
 Created for Windows using WinSock lib.
 Used language c++,
+
+
 DB created with fields.
 
 ![image](https://github.com/ryne2298/CIS427Project1/assets/83892913/decbc8da-eb33-4e93-8b11-43c6bf8d554f)
 
 
+Server.cpp:
 
-
-	Server run:  
 ![image](https://github.com/ryne2298/CIS427Project1/assets/83892913/bb2816a9-50f3-42fb-ac7d-f36575f1b859)
 
 
