@@ -131,6 +131,7 @@
   <ItemGroup>
     <ClCompile Include="..\sqlite-amalgamation-3450100\sqlite3.c" />
     <ClCompile Include="Client.cpp" />
+    <ClCompile Include="Server.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WinSock2.h" />

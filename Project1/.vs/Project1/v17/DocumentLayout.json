@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\Yuliya\\source\\repos\\CIS427Project2\\CIS427Project1\\Project1\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{0B0F92C1-919F-4A93-873E-258442BEA977}|Project1\\Project1.vcxproj|C:\\Users\\Yuliya\\source\\repos\\CIS427Project2\\CIS427Project1\\Project1\\Project1\\Server.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0B0F92C1-919F-4A93-873E-258442BEA977}|Project1\\Project1.vcxproj|solutionrelative:Project1\\Server.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{0B0F92C1-919F-4A93-873E-258442BEA977}|Project1\\Project1.vcxproj|C:\\Users\\Yuliya\\source\\repos\\CIS427Project2\\CIS427Project1\\Project1\\Project1\\Client.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{0B0F92C1-919F-4A93-873E-258442BEA977}|Project1\\Project1.vcxproj|solutionrelative:Project1\\Client.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
@@ -14,17 +18,34 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "Server.cpp",
+              "DocumentMoniker": "C:\\Users\\Yuliya\\source\\repos\\CIS427Project2\\CIS427Project1\\Project1\\Project1\\Server.cpp",
+              "RelativeDocumentMoniker": "Project1\\Server.cpp",
+              "ToolTip": "C:\\Users\\Yuliya\\source\\repos\\CIS427Project2\\CIS427Project1\\Project1\\Project1\\Server.cpp",
+              "RelativeToolTip": "Project1\\Server.cpp",
+              "ViewState": "AQIAAMsBAAAAAAAAAAAmwOEBAAARAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-03-14T00:08:55.513Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
               "Title": "Client.cpp",
               "DocumentMoniker": "C:\\Users\\Yuliya\\source\\repos\\CIS427Project2\\CIS427Project1\\Project1\\Project1\\Client.cpp",
               "RelativeDocumentMoniker": "Project1\\Client.cpp",
               "ToolTip": "C:\\Users\\Yuliya\\source\\repos\\CIS427Project2\\CIS427Project1\\Project1\\Project1\\Client.cpp",
               "RelativeToolTip": "Project1\\Client.cpp",
-              "ViewState": "AQIAAJMAAAAAAAAAAAAAAKYAAAAFAAAA",
+              "ViewState": "AQIAAAwAAAAAAAAAAAAAAKYAAAAFAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-03-13T23:48:35.741Z",
               "EditorCaption": ""

@@ -349,7 +349,19 @@ void handleDeposit(SOCKET clientSocket, const std::string& userId, char* command
     }
 }
 
+void handleLogout(SOCKET clientSocket, const std::string& userId) {
+    if (userId.empty()) {
+        send(clientSocket, "403 No User Logged In\n", 22, 0);
+        return;
+    }
 
+    // Remove the user from the active users map
+    activeUsers.erase(clientSocket);
+
+    // closesocket(clientSocket);
+
+    send(clientSocket, "200 OK\n", 7, 0);
+}
 
 
 
@@ -457,6 +469,11 @@ int main() {
                     }
                     else if (strncmp(buf, "DEPOSIT", 7) == 0) {
                         handleDeposit(clientSocket, currentUserId, buf);
+                    }
+
+                    if (strncmp(buf, "QUIT", 4) == 0) {
+                        handleQuit(clientSocket);
+                        break;
                     }
                     else {
                         printf("Invalid command\n");

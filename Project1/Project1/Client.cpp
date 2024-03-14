@@ -148,8 +148,13 @@ int main(int argc, char* argv[]) {
             sendCommand(clientSocket, "QUIT\n"); // Make sure to notify the server
             break;
         }
-
-        sendCommand(clientSocket, command);
+        else if (command == "LOGOUT") {
+            sendCommand(clientSocket, "LOGOUT\n");
+            
+        }
+        else {
+            sendCommand(clientSocket, command);
+        }
     }
     if (listenerThread.joinable()) {
         listenerThread.join();

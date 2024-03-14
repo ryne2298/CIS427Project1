@@ -1,2 +1,6 @@
-﻿  Client.cpp
-  Project1.vcxproj -> C:\Users\Yuliya\source\repos\CIS427Project2\CIS427Project1\Project1\x64\Debug\Project1.exe
+﻿  Server.cpp
+C:\Users\Yuliya\source\repos\CIS427Project2\CIS427Project1\Project1\Project1\Server.cpp(214,55): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Yuliya\source\repos\CIS427Project2\CIS427Project1\Project1\Project1\Server.cpp(296,57): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Yuliya\source\repos\CIS427Project2\CIS427Project1\Project1\Project1\Server.cpp(345,44): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+Server.obj : error LNK2005: main already defined in Client.obj
+C:\Users\Yuliya\source\repos\CIS427Project2\CIS427Project1\Project1\x64\Debug\Project1.exe : fatal error LNK1169: one or more multiply defined symbols found
