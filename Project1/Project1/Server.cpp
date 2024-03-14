@@ -301,6 +301,8 @@ void handleLookup(SOCKET clientSocket, const std::string& userId, char* command)
     std::string sql = "SELECT * FROM Stocks WHERE owner = '" + userId + "' AND symbol LIKE '%" + stockName + "%';";
 }
 
+
+//added functionality due to undefineed functions
 bool updateUserBalance(const std::string& userId, float depositAmount) {
     char* errMsg = nullptr;
     char sql[1024];
@@ -315,7 +317,7 @@ bool updateUserBalance(const std::string& userId, float depositAmount) {
     }
     return true;
 }
-
+//added due to logic
 float getCurrentBalance(const std::string& userId) {
     sqlite3_stmt* stmt = nullptr;
     float balance = 100.0; // Default to 100.0 if not found

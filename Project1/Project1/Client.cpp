@@ -2,9 +2,9 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <string>
-#include <pthread.h>
+#include <thread>
 
-#pragma comment(lib, "Ws2_32.lib")
+using namespace std;
 
 #define SERVER_PORT "8080" 
 #define MAX_LINE 1024
@@ -145,7 +145,8 @@ int main(int argc, char* argv[]) {
         std::getline(std::cin, command);
 
         if (command == "QUIT") {
-            break; 
+            sendCommand(clientSocket, "QUIT\n"); // Make sure to notify the server
+            break;
         }
 
         sendCommand(clientSocket, command);

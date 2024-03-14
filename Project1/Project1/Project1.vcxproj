@@ -130,12 +130,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\sqlite-amalgamation-3450100\sqlite3.c" />
-    <ClCompile Include="Server.cpp" />
+    <ClCompile Include="Client.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WinSock2.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\DB\Stock.db" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
