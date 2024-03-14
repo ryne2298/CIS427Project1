@@ -1,4 +1,7 @@
-#CIS427Project2
+
+
+#CIS427 Project 2
+
 • Ryne White wryne@umich.edu
 • Yuliya Wickens yuliiaw@umich.edu
 
