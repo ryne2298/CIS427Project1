@@ -47,8 +47,8 @@ Here is githubLink just in case (it called Project1 however its project 2 extend
 https://github.com/ryne2298/CIS427Project1.git
 
 Creators: 
-Ryne White: implemented new functions needed for part 2.
-Yuliya Wickens: Improved functions from Project1, debugged it, Implemented multithreading (multiple users), Logout, makefile, debugged project 2 ( log is available in github).
+Ryne White: implemented new functions needed for part 2. (included Login, Deposit, Who, Lookup, Shutdown and List modified)
+Yuliya Wickens: Improved functions from Project1, debugged it, Implemented multithreading (multiple users), Logout, makefile, debugged project 2 ( log is available in github). (Buy, Sell, List, Balance, Quit, Logout)
 
 
 
